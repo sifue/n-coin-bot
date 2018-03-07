@@ -94,7 +94,7 @@ module.exports = (robot) => {
           isAdmin: false
         },
         transaction: t
-      }).spread((fromBalance, isCreated) => {
+      }).spread((fromBalance, isCreatedFrom) => {
         let displayName = fromBalance.displayName;
         if (!displayName) {
           displayName = fromBalance.name;
@@ -119,13 +119,17 @@ module.exports = (robot) => {
               isAdmin: false
             },
             transaction: t
-          }).spread((toBalance, isCreated) => {
-            // 取引更新処理
-            const pUpdate1 = Balance.update({ balance: fromBalance.balance - amount },
+          }).spread((toBalance, isCreatedTo) => {
+
+            // 取引更新処理 (トランザクション中作ったばっかりかどうかでtoBalance/fromBalanceの値があるかが異なる)
+            const fromBalanceValue = isCreatedFrom ? 100 - amount : fromBalance.balance - amount;
+            const toBalanceValue = isCreatedTo ? 100 + amount : toBalance.balance + amount;
+
+            const pUpdate1 = Balance.update({ balance: fromBalanceValue },
               { where: { userId: userId } },
               { transaction: t });
             const pUpdate2 = pUpdate1.then(() => {
-              return Balance.update({ balance: toBalance.balance + amount },
+              return Balance.update({ balance: toBalanceValue },
                 { where: { userId: toUserId } },
                 { transaction: t });
             });
