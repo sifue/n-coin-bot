@@ -170,7 +170,7 @@ module.exports = (robot) => {
       const messages = balances.map((b) => {
         return `第${b.rank}位: <@${b.userId}> ${b.balance}`;
       });
-      msg.send('■ 残高ランキングTop10\n' + messages.join(' ,'));
+      msg.send('■ 残高ランキングTop10\n' + messages.join(' , '));
     })
       .catch(e => {
         robot.logger.error(e);
@@ -192,7 +192,7 @@ module.exports = (robot) => {
       const messages = balances.map((b) => {
         return `第${b.rank}位: <@${b.userId}> ${b.balance}`;
       });
-      msg.send('■ 残高ランキングTop100\n' + messages.join(' ,'));
+      msg.send('■ 残高ランキングTop100\n' + messages.join(' , '));
     })
       .catch(e => {
         robot.logger.error(e);
