@@ -70,7 +70,11 @@ module.exports = (robot) => {
           isAdmin: false
         }
       }).spread((balance, isCreated) => {
-        msg.send(`<@${userId}>さんの残高は ${balance.balance} Nコインです。`);
+        if (balance.isAdmin) {
+          msg.send(`<@${userId}>さんの残高は ${balance.balance} Nコインです。また<@${userId}>さんは管理者です。`);
+        } else {
+          msg.send(`<@${userId}>さんの残高は ${balance.balance} Nコインです。`);
+        }
       })
         .catch(e => {
           robot.logger.error(e);
