@@ -82,54 +82,51 @@ module.exports = (robot) => {
   robot.hear(/!nc send/i, (msg) => {
     const user = msg.message.user;
     const userId = user.id;
-    sequelize.transaction((t) => {
-      return Balance.findOrCreate({
-        where: { userId: userId },
-        defaults: {
-          userId: userId,
-          name: user.name,
-          realName: user.real_name,
-          displayName: user.profile.display_name,
-          balance: 100,
-          isAdmin: false
-        },
-        transaction: t
-      }).spread((fromBalance, isCreatedFrom) => {
-        let displayName = fromBalance.displayName;
-        if (!displayName) {
-          displayName = fromBalance.name;
-        }
-        const parsed = msg.message.rawText.match(/^!nc send <@(.+)> (\d+)\s*$/);
-        const toUserId = parsed[1];
-        const amount = parseInt(parsed[2]);
 
-        if (amount > fromBalance.balance) {
-          msg.send(`<@${userId}>さんの残高は ${fromBalance.balance} Nコインしかないため、${amount} Nコインを送金することはできません。`);
-        } else if (toUserId === userId) {
-          msg.send(`<@${userId}>さん自身に送金することはできません。`);
-        } else {
-          return Balance.findOrCreate({
-            where: { userId: toUserId },
-            defaults: {
-              userId: toUserId,
-              name: '',
-              realName: '',
-              displayName: '',
-              balance: 100,
-              isAdmin: false
-            },
-            transaction: t
-          }).spread((toBalance, isCreatedTo) => {
+     Balance.findOrCreate({
+      where: { userId: userId },
+      defaults: {
+        userId: userId,
+        name: user.name,
+        realName: user.real_name,
+        displayName: user.profile.display_name,
+        balance: 100,
+        isAdmin: false
+      }
+    }).spread((fromBalance, isCreatedFrom) => {
 
-            // 取引更新処理 (トランザクション中作ったばっかりかどうかでtoBalance/fromBalanceの値があるかが異なる)
-            const fromBalanceValue = isCreatedFrom ? 100 - amount : fromBalance.balance - amount;
-            const toBalanceValue = isCreatedTo ? 100 + amount : toBalance.balance + amount;
+      let displayName = fromBalance.displayName;
+      if (!displayName) {
+        displayName = fromBalance.name;
+      }
+      const parsed = msg.message.rawText.match(/^!nc send <@(.+)> (\d+)\s*$/);
+      const toUserId = parsed[1];
+      const amount = parseInt(parsed[2]);
 
-            const pUpdate1 = Balance.update({ balance: fromBalanceValue },
+      if (amount > fromBalance.balance) {
+        msg.send(`<@${userId}>さんの残高は ${fromBalance.balance} Nコインしかないため、${amount} Nコインを送金することはできません。`);
+      } else if (toUserId === userId) {
+        msg.send(`<@${userId}>さん自身に送金することはできません。`);
+      } else {
+
+        Balance.findOrCreate({
+          where: { userId: toUserId },
+          defaults: {
+            userId: toUserId,
+            name: '',
+            realName: '',
+            displayName: '',
+            balance: 100,
+            isAdmin: false
+          }
+        }).spread((toBalance, isCreatedTo) => {
+
+          sequelize.transaction((t) => { // Transaction は Updateと DealCreate の時だけ
+            const pUpdate1 = Balance.update({ balance: fromBalance.balance - amount },
               { where: { userId: userId } },
               { transaction: t });
             const pUpdate2 = pUpdate1.then(() => {
-              return Balance.update({ balance: toBalanceValue },
+              return Balance.update({ balance: toBalance.balance + amount },
                 { where: { userId: toUserId } },
                 { transaction: t });
             });
@@ -144,18 +141,17 @@ module.exports = (robot) => {
             return pCreateLog.then(() => {
               msg.send(`<@${userId}>さんから<@${toUserId}>さんへ ${amount} Nコインが送金されました。`);
             });
-          });
-        }
-      })
-        .catch(e => {
-          robot.logger.error(e);
-        });
 
-    }).then((result) => {
-      // result is whatever the result of the promise chain returned to the transaction callback
-    }).catch((e) => {
-      robot.logger.error(e);
+          }).then((result) => {
+            // result is whatever the result of the promise chain returned to the transaction callback
+          }).catch((e) => {
+            robot.logger.error(e);
+          });
+          
+        });
+      }
     });
+    
   });
 
 
