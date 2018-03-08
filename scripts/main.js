@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 
-const Balance = require("../models/balance");
-const Deal = require("../models/deal");
-const loader = require("../models/sequelizeLoader");
+const Balance = require('../models/balance');
+const Deal = require('../models/deal');
+const loader = require('../models/sequelizeLoader');
 const Sequelize = loader.Sequelize;
 const sequelize = loader.database;
 
@@ -15,22 +15,22 @@ module.exports = robot => {
   // ヘルプ表示
   robot.hear(/!nc help/i, msg => {
     msg.send(
-      "■  Nコインとは\n" +
-        "Nコインとは生徒全員が最初から100枚持っている学内仮想通貨です。" +
-        "管理者はプログラミング講師。" +
-        "N高等学校の組織に対して良い行動をするとNコインがもらえます。" +
-        "他の生徒への良いはたらきかけで1、" +
-        "学習参加及びやってること自慢で10、" +
-        "学外にも影響がある大きな成果で100程度もらえます。" +
-        "なお金銭との交換はできませんが、" +
-        "生徒間で送金することができるほか、" +
-        "学内ランキングを確認できます。\n" +
-        "■ コマンド一覧\n" +
-        "`!nc mybalance` で自身の残高とランキングの確認\n" +
-        "`!nc balance {@ユーザー名}` でユーザーの残高確認\n" +
-        "`!nc send {@ユーザー名} {送金額(正の整数)}` でユーザーに送金\n" +
-        "`!nc top10` 残高ランキングトップ10を確認\n" +
-        "`!nc top100` 残高ランキングトップ100を確認"
+      '■  Nコインとは\n' +
+        'Nコインとは生徒全員が最初から100枚持っている学内仮想通貨です。' +
+        '管理者はプログラミング講師。' +
+        'N高等学校の組織に対して良い行動をするとNコインがもらえます。' +
+        '他の生徒への良いはたらきかけで1、' +
+        '学習参加及びやってること自慢で10、' +
+        '学外にも影響がある大きな成果で100程度もらえます。' +
+        'なお金銭との交換はできませんが、' +
+        '生徒間で送金することができるほか、' +
+        '学内ランキングを確認できます。\n' +
+        '■ コマンド一覧\n' +
+        '`!nc mybalance` で自身の残高とランキングの確認\n' +
+        '`!nc balance {@ユーザー名}` でユーザーの残高確認\n' +
+        '`!nc send {@ユーザー名} {送金額(正の整数)}` でユーザーに送金\n' +
+        '`!nc top10` 残高ランキングトップ10を確認\n' +
+        '`!nc top100` 残高ランキングトップ100を確認'
     );
   });
 
@@ -59,13 +59,13 @@ module.exports = robot => {
         } else {
           Balance.findAll({
             where: { isAdmin: false },
-            order: [["balance", "DESC"], ["userId", "ASC"]]
+            order: [['balance', 'DESC'], ['userId', 'ASC']]
           })
             .then(balances => {
-              let rankMessage = "またランキング順位は未定です。";
+              let rankMessage = 'またランキング順位は未定です。';
               balances.forEach((b, i) => {
                 if (b.userId === userId) {
-                  rankMessage = "またランキング順位は第" + (i + 1) + "位です。";
+                  rankMessage = 'またランキング順位は第' + (i + 1) + '位です。';
                 }
               });
               msg.send(
@@ -99,16 +99,16 @@ module.exports = robot => {
 
     if (!userId) {
       msg.send(
-        "`!nc balance {@ユーザー名}`のように@と一緒にユーザー名を入力する必要があります。"
+        '`!nc balance {@ユーザー名}`のように@と一緒にユーザー名を入力する必要があります。'
       );
     } else {
       Balance.findOrCreate({
         where: { userId: userId },
         defaults: {
           userId: userId,
-          name: "",
-          realName: "",
-          displayName: "",
+          name: '',
+          realName: '',
+          displayName: '',
           balance: balanceDefaultValue,
           isAdmin: false
         }
@@ -156,7 +156,7 @@ module.exports = robot => {
 
       if (!parsed) {
         msg.send(
-          "送金コマンドの形式が`!nc send {@ユーザー名} {送金額(正の整数)}`ではありません。"
+          '送金コマンドの形式が`!nc send {@ユーザー名} {送金額(正の整数)}`ではありません。'
         );
         return;
       }
@@ -173,15 +173,15 @@ module.exports = robot => {
       } else if (toUserId === userId) {
         msg.send(`<@${userId}>さん自身に送金することはできません。`);
       } else if (amount <= 0) {
-        msg.send("正の整数の送金額しか送ることはできません。");
+        msg.send('正の整数の送金額しか送ることはできません。');
       } else {
         Balance.findOrCreate({
           where: { userId: toUserId },
           defaults: {
             userId: toUserId,
-            name: "",
-            realName: "",
-            displayName: "",
+            name: '',
+            realName: '',
+            displayName: '',
             balance: balanceDefaultValue,
             isAdmin: false
           }
@@ -240,7 +240,7 @@ module.exports = robot => {
     Balance.findAll({
       limit: 10,
       where: { isAdmin: false },
-      order: [["balance", "DESC"], ["userId", "ASC"]]
+      order: [['balance', 'DESC'], ['userId', 'ASC']]
     })
       .then(balances => {
         balances.forEach((b, i) => {
@@ -249,7 +249,7 @@ module.exports = robot => {
         const messages = balances.map(b => {
           return `第${b.rank}位: <@${b.userId}> ${b.balance}`;
         });
-        msg.send("■ 残高ランキングTop10\n" + messages.join(" , "));
+        msg.send('■ 残高ランキングTop10\n' + messages.join(' , '));
       })
       .catch(e => {
         robot.logger.error(e);
@@ -263,7 +263,7 @@ module.exports = robot => {
     Balance.findAll({
       limit: 100,
       where: { isAdmin: false },
-      order: [["balance", "DESC"], ["userId", "ASC"]]
+      order: [['balance', 'DESC'], ['userId', 'ASC']]
     })
       .then(balances => {
         balances.forEach((b, i) => {
@@ -272,7 +272,7 @@ module.exports = robot => {
         const messages = balances.map(b => {
           return `第${b.rank}位: <@${b.userId}> ${b.balance}`;
         });
-        msg.send("■ 残高ランキングTop100\n" + messages.join(" , "));
+        msg.send('■ 残高ランキングTop100\n' + messages.join(' , '));
       })
       .catch(e => {
         robot.logger.error(e);
