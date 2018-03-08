@@ -217,8 +217,8 @@ module.exports = robot => {
               return pCreateLog.then(() => {
                 msg.send(
                   `<@${userId}>さんから<@${toUserId}>さんへ ${amount} Nコインが送金されました。\n` +
-                  `<@${userId}>さん 残高 ${newFromBalanceValue} Nコイン , ` +
-                  `<@${toUserId}>さん 残高 ${newToBalanceValue} Nコイン`
+                    `<@${userId}>さん 残高 ${newFromBalanceValue} Nコイン , ` +
+                    `<@${toUserId}>さん 残高 ${newToBalanceValue} Nコイン`
                 );
               });
             })
