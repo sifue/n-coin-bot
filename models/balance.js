@@ -25,7 +25,7 @@ const Balance = loader.database.define(
     balance: {
       type: Sequelize.INTEGER,
       allowNull: false,
-      defaultValue: 100,
+      defaultValue: 100
     },
     isAdmin: {
       type: Sequelize.BOOLEAN,
