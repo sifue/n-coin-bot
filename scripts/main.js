@@ -11,7 +11,7 @@ const balanceDefaultValue = Balance.balanceDefaultValue;
 Balance.sync();
 Deal.sync();
 
-//user : apiのuserオブジェクト 例) msg.message.user
+// user : apiのuserオブジェクト 例) msg.message.user
 function sendCoin(robot, msg, user, toUserId, amount) {
   Balance.findOrCreate({
     where: { userId: user.id },
@@ -125,12 +125,10 @@ module.exports = robot => {
 
   //送金スタンプを押すと送金
   robot.react(msg => {
-    if (msg.message.type == 'added' && msg.message.reaction == 'nc+1') {
-      const from_user = msg.message.user;
-      const to_id = msg.message.item_user.id;
-      if (to_id != robot.adapter.self.id) {
-        sendCoin(robot, msg, from_user, to_id, 1);
-      }
+    if (msg.message.type === 'added' && msg.message.reaction === 'nc+1') {
+      const fromUser = msg.message.user;
+      const toUserId = msg.message.item_user.id;
+      sendCoin(robot, msg, fromUser, toUserId, 1);
     }
   });
 
