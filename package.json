@@ -1,6 +1,6 @@
 {
   "name": "n-coin-bot",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "author": "soichiro_yosihmura@nnn.ed.jp",
   "description": "仮想通貨Nコインの送金、残高確認、ランキング表示を行うボット",

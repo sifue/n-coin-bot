@@ -2,6 +2,8 @@
 const loader = require('./sequelizeLoader');
 const Sequelize = loader.Sequelize;
 
+const balanceDefaultValue = 100;
+
 const Balance = loader.database.define(
   'balances',
   {
@@ -25,7 +27,7 @@ const Balance = loader.database.define(
     balance: {
       type: Sequelize.INTEGER,
       allowNull: false,
-      defaultValue: 100
+      defaultValue: balanceDefaultValue
     },
     isAdmin: {
       type: Sequelize.BOOLEAN,
@@ -45,5 +47,7 @@ const Balance = loader.database.define(
     ]
   }
 );
+
+Balance.balanceDefaultValue = balanceDefaultValue;
 
 module.exports = Balance;

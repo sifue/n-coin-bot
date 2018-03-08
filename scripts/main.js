@@ -6,6 +6,8 @@ const loader = require('../models/sequelizeLoader');
 const Sequelize = loader.Sequelize;
 const sequelize = loader.database;
 
+const balanceDefaultValue = Balance.balanceDefaultValue;
+
 Balance.sync();
 Deal.sync();
 
@@ -43,7 +45,7 @@ module.exports = robot => {
         name: user.name,
         realName: user.real_name,
         displayName: user.profile.display_name,
-        balance: 100,
+        balance: balanceDefaultValue,
         isAdmin: false
       }
     })
@@ -107,7 +109,7 @@ module.exports = robot => {
           name: '',
           realName: '',
           displayName: '',
-          balance: 100,
+          balance: balanceDefaultValue,
           isAdmin: false
         }
       })
@@ -142,7 +144,7 @@ module.exports = robot => {
         name: user.name,
         realName: user.real_name,
         displayName: user.profile.display_name,
-        balance: 100,
+        balance: balanceDefaultValue,
         isAdmin: false
       }
     }).spread((fromBalance, isCreatedFrom) => {
@@ -180,21 +182,23 @@ module.exports = robot => {
             name: '',
             realName: '',
             displayName: '',
-            balance: 100,
+            balance: balanceDefaultValue,
             isAdmin: false
           }
         }).spread((toBalance, isCreatedTo) => {
           sequelize
             .transaction(t => {
+              const newFromBalanceValue = fromBalance.balance - amount;
+              const newToBalanceValue = toBalance.balance + amount;
               // Transaction は Updateと DealCreate の時だけ
               const pUpdate1 = Balance.update(
-                { balance: fromBalance.balance - amount },
+                { balance: newFromBalanceValue },
                 { where: { userId: userId } },
                 { transaction: t }
               );
               const pUpdate2 = pUpdate1.then(() => {
                 return Balance.update(
-                  { balance: toBalance.balance + amount },
+                  { balance: newToBalanceValue },
                   { where: { userId: toUserId } },
                   { transaction: t }
                 );
@@ -212,7 +216,9 @@ module.exports = robot => {
               });
               return pCreateLog.then(() => {
                 msg.send(
-                  `<@${userId}>さんから<@${toUserId}>さんへ ${amount} Nコインが送金されました。`
+                  `<@${userId}>さんから<@${toUserId}>さんへ ${amount} Nコインが送金されました。\n` +
+                  `<@${userId}>さん 残高 ${newFromBalanceValue} Nコイン , ` +
+                  `<@${toUserId}>さん 残高 ${newToBalanceValue} Nコイン`
                 );
               });
             })
