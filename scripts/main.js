@@ -14,8 +14,18 @@ module.exports = (robot) => {
   // ヘルプ表示
   robot.hear(/!nc help/i, (msg) => {
     msg.send(
+      '■  Nコインとは\n' +
+      'Nコインとは生徒全員が最初から100枚持っている学内仮想通貨です。' +
+      '管理者はプログラミング講師。' +
+      'N高等学校の組織に対して良い行動をするとNコインがもらえます。' + 
+      '他の生徒への良いはたらきかけで1、' +
+      '学習参加及びやってること自慢で10、' + 
+      '学外にも影響がある大きな成果で100程度もらえます。' + 
+      'なお金銭との交換はできませんが、' + 
+      '生徒間で送金することができるほか、' + 
+      '学内ランキングを確認できます。\n' +
       '■ コマンド一覧\n' +
-      '`!nc mybalance` で自身の残高確認\n' +
+      '`!nc mybalance` で自身の残高とランキングの確認\n' +
       '`!nc balance {@ユーザー名}` でユーザーの残高確認\n' +
       '`!nc send {@ユーザー名} {送金額(整数)}` でユーザーに送金\n' +
       '`!nc top10` 残高ランキングトップ10を確認\n' +
@@ -38,7 +48,25 @@ module.exports = (robot) => {
         isAdmin: false
       }
     }).spread((balance, isCreated) => {
-      msg.send(`<@${userId}>さんの残高は ${balance.balance} Nコインです。`);
+      if (balance.isAdmin) {
+        msg.send(`<@${userId}>さんの残高は ${balance.balance} Nコインです。また管理者に設定されています。`);
+      } else {
+        Balance.findAll({
+          where: { isAdmin: false },
+          order: [['balance', 'DESC'], ['userId', 'ASC']]
+        }).then((balances) => {
+          let rankMessage = 'またランキング順位は未定です。';
+          balances.forEach((b, i) => {
+            if (b.userId === userId) {
+              rankMessage = 'またランキング順位は第'+ (i + 1) + '位です。';
+            }
+          });
+          msg.send(`<@${userId}>さんの残高は ${balance.balance} Nコインです。` + rankMessage);
+        })
+        .catch(e => {
+          robot.logger.error(e);
+        });
+      }      
       // 名前をアップデートしておく
       Balance.update({
         name: user.name,
@@ -166,7 +194,7 @@ module.exports = (robot) => {
     Balance.findAll({
       limit: 10,
       where: { isAdmin: false },
-      order: [['balance', 'DESC']]
+      order: [['balance', 'DESC'], ['userId', 'ASC']]
     }).then((balances) => {
       balances.forEach((b, i) => {
         b.rank = i + 1;
@@ -176,9 +204,9 @@ module.exports = (robot) => {
       });
       msg.send('■ 残高ランキングTop10\n' + messages.join(' , '));
     })
-      .catch(e => {
-        robot.logger.error(e);
-      });
+    .catch(e => {
+      robot.logger.error(e);
+    });
   });
 
   // トップ100コマンド
@@ -188,7 +216,7 @@ module.exports = (robot) => {
     Balance.findAll({
       limit: 100,
       where: { isAdmin: false },
-      order: [['balance', 'DESC']]
+      order: [['balance', 'DESC'], ['userId', 'ASC']]
     }).then((balances) => {
       balances.forEach((b, i) => {
         b.rank = i + 1;
@@ -198,9 +226,9 @@ module.exports = (robot) => {
       });
       msg.send('■ 残高ランキングTop100\n' + messages.join(' , '));
     })
-      .catch(e => {
-        robot.logger.error(e);
-      });
+    .catch(e => {
+      robot.logger.error(e);
+    });
   });
 
 };
