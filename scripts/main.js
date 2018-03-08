@@ -87,6 +87,10 @@ function sendCoin(robot, msg, user, toUserId, amount) {
                   `<@${user.id}>さん 残高 ${newFromBalanceValue} Nコイン , ` +
                   `<@${toUserId}>さん 残高 ${newToBalanceValue} Nコイン`
               );
+              robot.messageRoom(
+                toUserId,
+                `<@${user.id}> さんから ${amount} Nコインを受け取りました。`
+              );
             });
           })
           .then(result => {
