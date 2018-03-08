@@ -35,7 +35,7 @@ module.exports = robot => {
   });
 
   // 自身の残高確認コマンド
-  robot.hear(/^!nc mybalance/i, msg => {
+  robot.hear(/!nc mybalance/i, msg => {
     const user = msg.message.user;
     const userId = user.id;
     Balance.findOrCreate({
@@ -93,7 +93,7 @@ module.exports = robot => {
   });
 
   // ユーザーの残高確認コマンド
-  robot.hear(/^!nc balance/i, msg => {
+  robot.hear(/!nc balance/i, msg => {
     const parsed = msg.message.rawText.match(/^!nc balance <@(.+)>\s*$/);
     const userId = parsed[1];
 
@@ -133,7 +133,7 @@ module.exports = robot => {
   });
 
   // 送金コマンド
-  robot.hear(/^!nc send/i, msg => {
+  robot.hear(/!nc send/i, msg => {
     const user = msg.message.user;
     const userId = user.id;
 
@@ -234,7 +234,7 @@ module.exports = robot => {
   });
 
   // トップ10コマンド
-  robot.hear(/^!nc top10$/i, msg => {
+  robot.hear(/!nc top10$/i, msg => {
     const user = msg.message.user;
     const userId = user.id;
     Balance.findAll({
@@ -257,7 +257,7 @@ module.exports = robot => {
   });
 
   // トップ100コマンド
-  robot.hear(/^!nc top100$/i, msg => {
+  robot.hear(/!nc top100$/i, msg => {
     const user = msg.message.user;
     const userId = user.id;
     Balance.findAll({
