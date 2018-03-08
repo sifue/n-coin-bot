@@ -157,8 +157,6 @@ module.exports = robot => {
       if (!parsed) {
         msg.send(
           '送金コマンドの形式が`!nc send {@ユーザー名} {送金額(正の整数)}`ではありません。'
-        
-        
         );
         return;
       }
