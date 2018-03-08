@@ -27,7 +27,7 @@ module.exports = (robot) => {
       '■ コマンド一覧\n' +
       '`!nc mybalance` で自身の残高とランキングの確認\n' +
       '`!nc balance {@ユーザー名}` でユーザーの残高確認\n' +
-      '`!nc send {@ユーザー名} {送金額(整数)}` でユーザーに送金\n' +
+      '`!nc send {@ユーザー名} {送金額(正の整数)}` でユーザーに送金\n' +
       '`!nc top10` 残高ランキングトップ10を確認\n' +
       '`!nc top100` 残高ランキングトップ100を確認'
     );
@@ -132,6 +132,12 @@ module.exports = (robot) => {
         displayName = fromBalance.name;
       }
       const parsed = msg.message.rawText.match(/^!nc send <@(.+)> (\d+)\s*$/);
+
+      if (!parsed) {
+        msg.send('送金コマンドの形式が`!nc send {@ユーザー名} {送金額(正の整数)}`ではありません。');
+        return;
+      }
+
       const toUserId = parsed[1];
       const amount = parseInt(parsed[2]);
 
@@ -139,6 +145,8 @@ module.exports = (robot) => {
         msg.send(`<@${userId}>さんの残高は ${fromBalance.balance} Nコインしかないため、${amount} Nコインを送金することはできません。`);
       } else if (toUserId === userId) {
         msg.send(`<@${userId}>さん自身に送金することはできません。`);
+      } else if (amount <= 0) {
+        msg.send('正の整数の送金額しか送ることはできません。');
       } else {
 
         Balance.findOrCreate({
