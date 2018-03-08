@@ -202,7 +202,7 @@ module.exports = robot => {
 
     if (!userId) {
       msg.send(
-        '`!nc balance {@ユーザー名}`のように@と一緒にユーザー名を入力する必要があります。'
+        '`!nc balance {@ユーザー名}` のように@と一緒にユーザー名を入力する必要があります。'
       );
     } else {
       Balance.findOrCreate({
@@ -240,7 +240,7 @@ module.exports = robot => {
     const parsed = msg.message.rawText.match(/^!nc send <@(.+)> (\d+)\s*$/);
     if (!parsed) {
       msg.send(
-        '送金コマンドの形式が`!nc send {@ユーザー名} {送金額(正の整数)}`ではありません。'
+        '送金コマンドの形式が `!nc send {@ユーザー名} {送金額(正の整数)}` ではありません。'
       );
       return;
     }
