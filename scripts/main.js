@@ -12,7 +12,7 @@ Balance.sync();
 Deal.sync();
 
 //user : apiのuserオブジェクト 例) msg.message.user
-function send_coin(robot, msg, user, toUserId, amount) {
+function sendCoin(robot, msg, user, toUserId, amount) {
   const toUser = robot.brain.data.users[toUserId];
   Balance.findOrCreate({
     where: { userId: user.id },
@@ -140,7 +140,7 @@ module.exports = robot => {
       const from_user = msg.message.user;
       const to_id = msg.message.item_user.id;
       if (to_id != robot.adapter.self.id) {
-        send_coin(robot, msg, from_user, to_id, 1);
+        sendCoin(robot, msg, from_user, to_id, 1);
       }
     }
   });
@@ -254,7 +254,7 @@ module.exports = robot => {
     }
     const toUserId = parsed[1];
     const amount = parseInt(parsed[2]);
-    send_coin(robot, msg, msg.message.user, toUserId, amount);
+    sendCoin(robot, msg, msg.message.user, toUserId, amount);
   });
 
   // トップ10コマンド
