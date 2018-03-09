@@ -5,7 +5,8 @@ const Deal = require('../models/deal');
 const loader = require('../models/sequelizeLoader');
 const Sequelize = loader.Sequelize;
 const sequelize = loader.database;
-const logChannelId = 'C9N87D70X';
+// const logChannelId = 'C9N87D70X';
+const logChannelId = 'C9LGU0Q3S';
 const balanceDefaultValue = Balance.balanceDefaultValue;
 
 Balance.sync();
@@ -13,6 +14,7 @@ Deal.sync();
 
 //user : apiのuserオブジェクト 例) msg.message.user
 function send_coin(robot, msg, user, toUserId, amount) {
+  const toUser = robot.brain.data.users[toUserId];
   Balance.findOrCreate({
     where: { userId: user.id },
     defaults: {
@@ -93,9 +95,9 @@ function send_coin(robot, msg, user, toUserId, amount) {
               );
               robot.messageRoom(
                 logChannelId,
-                `<@${
-                  user.id
-                }>さんから<@${toUserId}>さんへ ${amount} Nコインが送金されました。`
+                `${user.profile.display_name} さんから ${
+                  toUser.slack.profile.display_name
+                } さんへ ${amount} Nコインが送金されました。`
               );
             });
           })
