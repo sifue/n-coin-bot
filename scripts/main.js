@@ -130,7 +130,8 @@ module.exports = robot => {
         '`!nc balance {@ユーザー名}` でユーザーの残高確認\n' +
         '`!nc send {@ユーザー名} {送金額(正の整数)}` でユーザーに送金\n' +
         '`!nc top10` 残高ランキングトップ10を確認 (DMでの利用推奨)\n' +
-        '`!nc top100` 残高ランキングトップ100を確認 (DMでの利用推奨)'
+        '`!nc top100` 残高ランキングトップ100を確認 (DMでの利用推奨)\n' +
+        'リアクション `:nc+1:` を付けることで 1 Nコインを相手に送金'
     );
   });
 
@@ -210,7 +211,7 @@ module.exports = robot => {
 
     if (!userId) {
       msg.send(
-        '`!nc balance {@ユーザー名}`のように@と一緒にユーザー名を入力する必要があります。'
+        '`!nc balance {@ユーザー名}` のように@と一緒にユーザー名を入力する必要があります。'
       );
     } else {
       Balance.findOrCreate({
@@ -248,7 +249,7 @@ module.exports = robot => {
     const parsed = msg.message.rawText.match(/^!nc send <@(.+)> (\d+)\s*$/);
     if (!parsed) {
       msg.send(
-        '送金コマンドの形式が`!nc send {@ユーザー名} {送金額(正の整数)}`ではありません。'
+        '送金コマンドの形式が `!nc send {@ユーザー名} {送金額(正の整数)}` ではありません。'
       );
       return;
     }
