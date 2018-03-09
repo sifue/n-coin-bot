@@ -92,12 +92,14 @@ function sendCoin(robot, msg, user, toUserId, amount) {
                 toUserId,
                 `<@${user.id}> さんから ${amount} Nコインを受け取りました。`
               );
-              robot.messageRoom(
-                logChannelId,
-                `${user.profile.display_name} さんから ${
-                  toUser.slack.profile.display_name
-                } さんへ ${amount} Nコインが送金されました。`
-              );
+              if(toUesr){
+                robot.messageRoom(
+                  logChannelId,
+                  `${user.profile.display_name} さんから ${
+                    toUser.slack.profile.display_name
+                  } さんへ ${amount} Nコインが送金されました。`
+                );
+              }
             });
           })
           .then(result => {
