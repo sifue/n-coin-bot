@@ -5,7 +5,7 @@ const Deal = require('../models/deal');
 const loader = require('../models/sequelizeLoader');
 const Sequelize = loader.Sequelize;
 const sequelize = loader.database;
-
+const LOG_CHANNEL_ID = 'C9N87D70X';
 const balanceDefaultValue = Balance.balanceDefaultValue;
 
 Balance.sync();
@@ -90,6 +90,12 @@ function send_coin(robot, msg, user, toUserId, amount) {
               robot.messageRoom(
                 toUserId,
                 `<@${user.id}> さんから ${amount} Nコインを受け取りました。`
+              );
+              robot.messageRoom(
+                LOG_CHANNEL_ID,
+                `<@${
+                  user.id
+                }>さんから<@${toUserId}>さんへ ${amount} Nコインが送金されました。`
               );
             });
           })
