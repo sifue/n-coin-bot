@@ -11,8 +11,9 @@ const balanceDefaultValue = Balance.balanceDefaultValue;
 Balance.sync();
 Deal.sync();
 
-// user : apiのuserオブジェクト 例) msg.message.user
+//user : apiのuserオブジェクト 例) msg.message.user
 function sendCoin(robot, msg, user, toUserId, amount) {
+  const toUser = robot.brain.data.users[toUserId];
   Balance.findOrCreate({
     where: { userId: user.id },
     defaults: {
@@ -91,12 +92,14 @@ function sendCoin(robot, msg, user, toUserId, amount) {
                 toUserId,
                 `<@${user.id}> さんから ${amount} Nコインを受け取りました。`
               );
-              robot.messageRoom(
-                logChannelId,
-                `<@${
-                  user.id
-                }>さんから<@${toUserId}>さんへ ${amount} Nコインが送金されました。`
-              );
+              if(toUesr){
+                robot.messageRoom(
+                  logChannelId,
+                  `${user.profile.display_name} さんから ${
+                    toUser.slack.profile.display_name
+                  } さんへ ${amount} Nコインが送金されました。`
+                );
+              }
             });
           })
           .then(result => {
@@ -136,10 +139,12 @@ module.exports = robot => {
 
   //送金スタンプを押すと送金
   robot.react(msg => {
-    if (msg.message.type === 'added' && msg.message.reaction === 'nc+1') {
-      const fromUser = msg.message.user;
-      const toUserId = msg.message.item_user.id;
-      sendCoin(robot, msg, fromUser, toUserId, 1);
+    if (msg.message.type == 'added' && msg.message.reaction == 'nc+1') {
+      const from_user = msg.message.user;
+      const to_id = msg.message.item_user.id;
+      if (to_id != robot.adapter.self.id) {
+        sendCoin(robot, msg, from_user, to_id, 1);
+      }
     }
   });
 
