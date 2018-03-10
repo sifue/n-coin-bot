@@ -26,7 +26,17 @@ const Deal = loader.database.define(
   {
     freezeTableName: false,
     timestamps: true,
-    indexes: []
+    indexes: [
+      {
+        fields: ['fromUserId']
+      },
+      {
+        fields: ['toUserId']
+      },
+      {
+        fields: ['createdAt']
+      }
+    ]
   }
 );
 
