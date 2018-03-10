@@ -25,7 +25,7 @@ module.exports = robot => {
     }
     const opponentHand = parsed[1];
     const bed = parseInt(parsed[2]);
-    const maxBed = 30;
+    const maxBed = 100000;
 
     if (bed > maxBed) {
       msg.send(
