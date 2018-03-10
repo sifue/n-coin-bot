@@ -5,6 +5,8 @@ const Deal = require('../models/deal');
 const loader = require('../models/sequelizeLoader');
 const Sequelize = loader.Sequelize;
 const sequelize = loader.database;
+const moment = require('moment');
+const dateFormat = 'YYYY-MM-DD hh:mm:ss';
 const balanceDefaultValue = Balance.balanceDefaultValue;
 const sendCoin = require('../models/sendCoin');
 
@@ -97,6 +99,66 @@ module.exports = robot => {
           },
           { where: { userId: userId } }
         );
+      })
+      .catch(e => {
+        robot.logger.error(e);
+      });
+  });
+
+  //取引履歴を照会 !nc deallog {表示数(1~100)}
+  robot.hear(/!nc deallog/i, msg => {
+    const user = msg.message.user;
+    const userId = user.id;
+    const parsed = msg.message.rawText.match(/^!nc deallog \d{1,4}\s*$/);
+
+    if (!parsed) {
+      msg.send(
+        '照会コマンドの形式が `!nc deallog {表示数(1000未満)}` ではありません。'
+      );
+      return;
+    }
+
+    var showCount = parseInt(msg.message.text.split(' ')[2]);
+    var log = '';
+
+    Deal.findAll({
+      where: { fromUserId: userId },
+      order: '"createdAt" DESC'
+    })
+      .then(res => {
+        var to;
+        var date;
+        var amount;
+        var formatedDate;
+        showCount = Math.min(showCount, res.length);
+        log += `*出金 - ${showCount}件 -*\n`;
+        for (var i = 0; i < showCount; i++) {
+          to = res[i].dataValues.toUserId;
+          date = res[i].dataValues.createdAt;
+          amount = res[i].dataValues.amount;
+          formatedDate = moment(date).format(dateFormat);
+          log += `    [${formatedDate}] <@${to}>さんへ *${amount}N* コインを送金しました。\n`;
+        }
+        return Deal.findAll({
+          where: { toUserId: userId },
+          order: '"createdAt" DESC'
+        });
+      })
+      .then(res => {
+        var from;
+        var amount;
+        var date;
+        var formatedDate;
+        showCount = Math.min(showCount, res.length);
+        log += `\n*入金 - ${showCount}件 -*\n`;
+        for (var i = 0; i < showCount; i++) {
+          from = res[i].dataValues.fromUserId;
+          amount = res[i].dataValues.amount;
+          date = res[i].dataValues.createdAt;
+          formatedDate = moment(date).format(dateFormat);
+          log += `    [${formatedDate}] <@${from}>さんから *${amount}N* コインを受け取りました。\n`;
+        }
+        msg.send(log);
       })
       .catch(e => {
         robot.logger.error(e);
