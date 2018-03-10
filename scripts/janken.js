@@ -78,7 +78,15 @@ module.exports = robot => {
             isAdmin: true
           }
         }).spread((myBalance, isCreatedTo) => {
-          if (myBalance.balance < bed) {
+          if (myBalance.balance <= 30){
+            msg.send(
+              `すみません。わたしの残高が ${
+                myBalance.balance
+              } Nコインしかないため、破産の危険があるのでジャンケンを続行することは出来ません。`
+            );
+            return;
+          }
+          else if (myBalance.balance < bed) {
             msg.send(
               `すみません。わたしの残高は ${
                 myBalance.balance
