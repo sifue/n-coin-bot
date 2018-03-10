@@ -78,7 +78,7 @@ module.exports = robot => {
             isAdmin: true
           }
         }).spread((myBalance, isCreatedTo) => {
-          if (myBalance.balance <= 30){
+          if (myBalance.balance <= 10){
             msg.send(
               `すみません。わたしの残高が ${
                 myBalance.balance
