@@ -5,116 +5,17 @@ const Deal = require('../models/deal');
 const loader = require('../models/sequelizeLoader');
 const Sequelize = loader.Sequelize;
 const sequelize = loader.database;
-const logChannelId = 'C9N87D70X';
 const balanceDefaultValue = Balance.balanceDefaultValue;
+const sendCoin = require('../models/sendCoin');
 
 Balance.sync();
 Deal.sync();
-
-// user : apiのuserオブジェクト 例) msg.message.user
-function sendCoin(robot, msg, user, toUserId, amount) {
-  Balance.findOrCreate({
-    where: { userId: user.id },
-    defaults: {
-      userId: user.id,
-      name: user.name,
-      realName: user.real_name,
-      displayName: user.profile.display_name,
-      balance: balanceDefaultValue,
-      isAdmin: false
-    }
-  }).spread((fromBalance, isCreatedFrom) => {
-    let displayName = fromBalance.displayName;
-    if (!displayName) {
-      displayName = fromBalance.name;
-    }
-
-    if (amount > fromBalance.balance) {
-      msg.send(
-        `<@${user.id}>さんの残高は ${
-          fromBalance.balance
-        } Nコインしかないため、${amount} Nコインを送金することはできません。`
-      );
-    } else if (toUserId === user.id) {
-      msg.send(`<@${user.id}>さん自身に送金することはできません。`);
-    } else if (amount <= 0) {
-      msg.send('正の整数の送金額しか送ることはできません。');
-    } else {
-      Balance.findOrCreate({
-        where: { userId: toUserId },
-        defaults: {
-          userId: toUserId,
-          name: '',
-          realName: '',
-          displayName: '',
-          balance: balanceDefaultValue,
-          isAdmin: false
-        }
-      }).spread((toBalance, isCreatedTo) => {
-        sequelize
-          .transaction(t => {
-            const newFromBalanceValue = fromBalance.balance - amount;
-            const newToBalanceValue = toBalance.balance + amount;
-            // Transaction は Updateと DealCreate の時だけ
-            const pUpdate1 = Balance.update(
-              { balance: newFromBalanceValue },
-              { where: { userId: user.id } },
-              { transaction: t }
-            );
-            const pUpdate2 = pUpdate1.then(() => {
-              return Balance.update(
-                { balance: newToBalanceValue },
-                { where: { userId: toUserId } },
-                { transaction: t }
-              );
-            });
-            const pCreateLog = pUpdate2.then(() => {
-              // ログ作成処理
-              return Deal.create(
-                {
-                  fromUserId: user.id,
-                  toUserId: toUserId,
-                  amount: amount
-                },
-                { transaction: t }
-              );
-            });
-            return pCreateLog.then(() => {
-              msg.send(
-                `<@${
-                  user.id
-                }>さんから<@${toUserId}>さんへ ${amount} Nコインが送金されました。\n` +
-                  `<@${user.id}>さん 残高 ${newFromBalanceValue} Nコイン , ` +
-                  `<@${toUserId}>さん 残高 ${newToBalanceValue} Nコイン`
-              );
-              robot.messageRoom(
-                toUserId,
-                `<@${user.id}> さんから ${amount} Nコインを受け取りました。`
-              );
-              robot.messageRoom(
-                logChannelId,
-                `<@${
-                  user.id
-                }>さんから<@${toUserId}>さんへ ${amount} Nコインが送金されました。`
-              );
-            });
-          })
-          .then(result => {
-            // result is whatever the result of the promise chain returned to the transaction callback
-          })
-          .catch(e => {
-            robot.logger.error(e);
-          });
-      });
-    }
-  });
-}
 
 module.exports = robot => {
   // ヘルプ表示
   robot.hear(/^!nc help/i, msg => {
     msg.send(
-      '■  Nコインとは\n' +
+      '■ Nコインとは\n' +
         'Nコインとは生徒全員が最初から100枚持っている学内仮想通貨です。' +
         '管理者はプログラミング講師。' +
         'N高等学校の組織に対して良い行動をするとNコインがもらえます。' +
@@ -130,6 +31,7 @@ module.exports = robot => {
         '`!nc send {@ユーザー名} {送金額(正の整数)}` でユーザーに送金\n' +
         '`!nc top10` 残高ランキングトップ10を確認 (DMでの利用推奨)\n' +
         '`!nc top100` 残高ランキングトップ100を確認 (DMでの利用推奨)\n' +
+        '`!nc janken {グー or チョキ or パー} {ベッド額(正の整数)}` Nコインをかけてボットとジャンケン\n' +
         'リアクション `:nc+1:` を付けることで 1 Nコインを相手に送金'
     );
   });
