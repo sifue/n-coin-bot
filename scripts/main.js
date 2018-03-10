@@ -66,9 +66,9 @@ module.exports = robot => {
       .spread((balance, isCreated) => {
         if (balance.isAdmin) {
           msg.send(
-            `<@${userId}>さんの残高は ${
+            `<@${userId}>さんの残高は *${
               balance.balance
-            } Nコインです。また管理者に設定されています。`
+            }N* コインです。また管理者に設定されています。`
           );
         } else {
           Balance.findAll({
@@ -79,11 +79,12 @@ module.exports = robot => {
               let rankMessage = 'またランキング順位は未定です。';
               balances.forEach((b, i) => {
                 if (b.userId === userId) {
-                  rankMessage = 'またランキング順位は第' + (i + 1) + '位です。';
+                  rankMessage =
+                    'またランキング順位は *第' + (i + 1) + '位* です。';
                 }
               });
               msg.send(
-                `<@${userId}>さんの残高は ${balance.balance} Nコインです。` +
+                `<@${userId}>さんの残高は *${balance.balance}N* コインです。` +
                   rankMessage
               );
             })
@@ -130,13 +131,13 @@ module.exports = robot => {
         .spread((balance, isCreated) => {
           if (balance.isAdmin) {
             msg.send(
-              `<@${userId}>さんの残高は ${
+              `<@${userId}>さんの残高は *${
                 balance.balance
-              } Nコインです。また<@${userId}>さんは管理者です。`
+              }N* コインです。また<@${userId}>さんは管理者です。`
             );
           } else {
             msg.send(
-              `<@${userId}>さんの残高は ${balance.balance} Nコインです。`
+              `<@${userId}>さんの残高は *${balance.balance}N* コインです。`
             );
           }
         })
@@ -234,7 +235,7 @@ module.exports = robot => {
           b.rank = i + 1;
         });
         const messages = balances.map(b => {
-          return `第${b.rank}位: <@${b.userId}> ${b.balance}`;
+          return `*第${b.rank}位* : <@${b.userId}> *${b.balance}*`;
         });
         msg.send('■ 残高ランキングTop10\n' + messages.join(' , '));
       })
@@ -257,7 +258,7 @@ module.exports = robot => {
           b.rank = i + 1;
         });
         const messages = balances.map(b => {
-          return `第${b.rank}位: <@${b.userId}> ${b.balance}`;
+          return `*第${b.rank}位* : <@${b.userId}> *${b.balance}*`;
         });
         msg.send('■ 残高ランキングTop100\n' + messages.join(' , '));
       })
