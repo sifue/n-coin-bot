@@ -58,7 +58,7 @@ module.exports = robot => {
         isAdmin: false
       }
     }).spread((opponentBalance, isCreateOpponent) => {
-      if (myBalance.balance <= 10){
+      if (opponentBalance.balance <= 10){
         msg.send(
           `<@${opponent.id}>さんの残高は ${
             opponentBalance.balance
