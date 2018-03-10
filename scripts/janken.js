@@ -58,7 +58,15 @@ module.exports = robot => {
         isAdmin: false
       }
     }).spread((opponentBalance, isCreateOpponent) => {
-      if (bed > opponentBalance.balance) {
+      if (myBalance.balance <= 10){
+        msg.send(
+          `<@${opponent.id}>さんの残高は ${
+            opponentBalance.balance
+          } Nコインしかないため、${bed} これ以上ジャンケンは出来ません。`
+        );
+        return;
+      }
+      else if (bed > opponentBalance.balance) {
         msg.send(
           `<@${opponent.id}>さんの残高は ${
             opponentBalance.balance
@@ -78,15 +86,7 @@ module.exports = robot => {
             isAdmin: true
           }
         }).spread((myBalance, isCreatedTo) => {
-          if (myBalance.balance <= 10){
-            msg.send(
-              `すみません。わたしの残高が ${
-                myBalance.balance
-              } Nコインしかないため、破産の危険があるのでジャンケンを続行することは出来ません。`
-            );
-            return;
-          }
-          else if (myBalance.balance < bed) {
+          if (myBalance.balance < bed) {
             msg.send(
               `すみません。わたしの残高は ${
                 myBalance.balance
