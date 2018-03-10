@@ -5,7 +5,6 @@ const Deal = require('../models/deal');
 const loader = require('../models/sequelizeLoader');
 const Sequelize = loader.Sequelize;
 const sequelize = loader.database;
-const logChannelId = 'C9N87D70X';
 const balanceDefaultValue = Balance.balanceDefaultValue;
 const sendCoin = require('../models/sendCoin');
 
