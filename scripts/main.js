@@ -6,6 +6,8 @@ const loader = require('../models/sequelizeLoader');
 const Sequelize = loader.Sequelize;
 const sequelize = loader.database;
 const balanceDefaultValue = Balance.balanceDefaultValue;
+const moment = require('moment');
+const dateFormat = 'YYYY-MM-DD hh:mm:ss';
 const sendCoin = require('../models/sendCoin');
 
 Balance.sync();
@@ -31,6 +33,7 @@ module.exports = robot => {
         '`!nc send {@ユーザー名} {送金額(正の整数)}` でユーザーに送金\n' +
         '`!nc top10` 残高ランキングトップ10を確認 (DMでの利用推奨)\n' +
         '`!nc top100` 残高ランキングトップ100を確認 (DMでの利用推奨)\n' +
+        '`!nc deallog {表示件数(1000未満)}` 自分の取引履歴を確認 (DMでの利用推奨)\n' +
         '`!nc janken {グー or チョキ or パー} {ベッド額(正の整数)}` Nコインをかけてボットとジャンケン\n' +
         'リアクション `:nc+1:` を付けることで 1 Nコインを相手に送金'
     );
@@ -155,6 +158,66 @@ module.exports = robot => {
     const toUserId = parsed[1];
     const amount = parseInt(parsed[2]);
     sendCoin(robot, msg, msg.message.user, toUserId, amount);
+  });
+
+  //取引履歴を照会 !nc deallog {表示数(1~100)}
+  robot.hear(/!nc deallog/i, msg => {
+    const user = msg.message.user;
+    const userId = user.id;
+    const parsed = msg.message.rawText.match(/^!nc deallog \d{1,3}\s*$/);
+
+    if (!parsed) {
+      msg.send(
+        '照会コマンドの形式が `!nc deallog {表示数(1000未満)}` ではありません。'
+      );
+      return;
+    }
+
+    let showCount = parseInt(msg.message.text.split(' ')[2]);
+    let log = '';
+
+    Deal.findAll({
+      limit: showCount,
+      where: { fromUserId: userId },
+      order: '"createdAt" DESC'
+    })
+      .then(deals => {
+        let to;
+        let date;
+        let amount;
+        let formatedDate;
+        log += `*出金 - ${deals.length}件 -*\n`;
+        deals.forEach(deal => {
+          to = deal.dataValues.toUserId;
+          date = deal.dataValues.createdAt;
+          amount = deal.dataValues.amount;
+          formatedDate = moment(date).format(dateFormat);
+          log += `    [${formatedDate}] <@${to}>さんへ *${amount}N* コインを送金しました。\n`;
+        });
+        return Deal.findAll({
+          limit: showCount,
+          where: { toUserId: userId },
+          order: '"createdAt" DESC'
+        });
+      })
+      .then(deals => {
+        let from;
+        let amount;
+        let date;
+        let formatedDate;
+        log += `\n*入金 - ${deals.length}件 -*\n`;
+        deals.forEach(deal => {
+          from = deal.dataValues.fromUserId;
+          amount = deal.dataValues.amount;
+          date = deal.dataValues.createdAt;
+          formatedDate = moment(date).format(dateFormat);
+          log += `    [${formatedDate}] <@${from}>さんから *${amount}N* コインを受け取りました。\n`;
+        });
+        msg.send(log);
+      })
+      .catch(e => {
+        robot.logger.error(e);
+      });
   });
 
   // トップ10コマンド
