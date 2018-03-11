@@ -110,8 +110,8 @@ function createMarketitem(msg, dataType, user, price, text) {
     return;
   }
 
-  if (price < 0) {
-    msg.send(`*${maxPrice}N* コインより小さいものは扱えません。`);
+  if (price < 1) {
+    msg.send('*1N* コインより小さいものは扱えません。');
     return;
   }
 
