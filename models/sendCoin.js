@@ -33,7 +33,7 @@ function sendCoin(robot, msg, user, toUserId, amount) {
       msg.send(
         `<@${user.id}>さんの残高は *${
           fromBalance.balance
-        }N* コインしかないため、*${amount}N* コインを送金することはできません。`
+        }N* コインしかないため、 *${amount}N* コインを送金することはできません。`
       );
     } else if (toUserId === user.id) {
       msg.send(`<@${user.id}>さん自身に送金することはできません。`);

@@ -14,7 +14,7 @@ module.exports = robot => {
   robot.hear(/^!nc markethelp/i, msg => {
     msg.send(
       '■ マーケットボードコマンド一覧\n' +
-        '`!nc market` マーケットボードの表示\n' +
+        '`!nc market` マーケットボードの表示(メンションが飛ぶためDMでの利用推奨)\n' +
         '`!nc buy {価格} {内容}` で「買います」項目の追加\n' +
         '`!nc sell {価格} {内容}` で「売ります」項目の追加\n' +
         '`!nc marketdelete {マーケット項目ID}` 項目の削除'
@@ -63,7 +63,7 @@ module.exports = robot => {
       limit: 100,
       order: '"marketitemId" DESC'
     }).then(marketitems => {
-      let message = '■ マーケット情報一覧\n';
+      let message = '■ マーケット情報一覧 (最新100件)\n';
       message += marketitems
         .map(m => {
           return `[${m.marketitemId}] <@${m.userId}>が *${m.price}N* コインで${
