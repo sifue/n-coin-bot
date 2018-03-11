@@ -82,9 +82,9 @@ module.exports = robot => {
         '■ マーケット情報一覧 (最新100件 - 出品タイプ/価格ソート)\n';
       message += sortedMarketitems
         .map(m => {
-          return `[${m.marketitemId}] <@${m.userId}>が *${m.price}N* コインで${
-            m.dataType
-          } : ${m.text}`;
+          return `[${m.marketitemId}] <@${m.userId}>が *${
+            m.price
+          }N* コインで *${m.dataType}* : ${m.text}`;
         })
         .join('\n');
       msg.send(message);
