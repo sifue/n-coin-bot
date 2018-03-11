@@ -31,9 +31,9 @@ function sendCoin(robot, msg, user, toUserId, amount) {
 
     if (amount > fromBalance.balance) {
       msg.send(
-        `<@${user.id}>さんの残高は ${
+        `<@${user.id}>さんの残高は *${
           fromBalance.balance
-        } Nコインしかないため、${amount} Nコインを送金することはできません。`
+        }N* コインしかないため、*${amount}N* コインを送金することはできません。`
       );
     } else if (toUserId === user.id) {
       msg.send(`<@${user.id}>さん自身に送金することはできません。`);
@@ -83,19 +83,19 @@ function sendCoin(robot, msg, user, toUserId, amount) {
               msg.send(
                 `<@${
                   user.id
-                }>さんから<@${toUserId}>さんへ ${amount} Nコインが送金されました。\n` +
-                  `<@${user.id}>さん 残高 ${newFromBalanceValue} Nコイン , ` +
-                  `<@${toUserId}>さん 残高 ${newToBalanceValue} Nコイン`
+                }>さんから<@${toUserId}>さんへ *${amount}N* コインが送金されました。\n` +
+                  `<@${user.id}>さん 残高 *${newFromBalanceValue}N* コイン , ` +
+                  `<@${toUserId}>さん 残高 *${newToBalanceValue}N* コイン`
               );
               robot.messageRoom(
                 toUserId,
-                `<@${user.id}> さんから ${amount} Nコインを受け取りました。`
+                `<@${user.id}> さんから *${amount}N* コインを受け取りました。`
               );
               robot.messageRoom(
                 logChannelId,
                 `<@${
                   user.id
-                }>さんから<@${toUserId}>さんへ ${amount} Nコインが送金されました。`
+                }>さんから<@${toUserId}>さんへ *${amount}N* コインが送金されました。`
               );
             });
           })
