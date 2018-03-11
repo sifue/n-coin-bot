@@ -63,8 +63,24 @@ module.exports = robot => {
       limit: 100,
       order: '"marketitemId" DESC'
     }).then(marketitems => {
-      let message = '■ マーケット情報一覧 (最新100件)\n';
-      message += marketitems
+      marketitems.forEach(e => {
+        if (e.dataType === '売ります') {
+          e.dataTypeValue = 1;
+        } else {
+          e.dataTypeValue = 0;
+        }
+      });
+
+      const sortedMarketitems = marketitems.sort((a, b) => {
+        if (a.dataTypeValue !== b.dataTypeValue) {
+          return a.dataTypeValue - b.dataTypeValue;
+        }
+        return a.price - b.price;
+      });
+
+      let message =
+        '■ マーケット情報一覧 (最新100件 - 出品タイプ/価格ソート)\n';
+      message += sortedMarketitems
         .map(m => {
           return `[${m.marketitemId}] <@${m.userId}>が *${m.price}N* コインで${
             m.dataType
