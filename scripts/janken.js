@@ -11,6 +11,24 @@ const sendCoin = require('../models/sendCoin');
 Balance.sync();
 Deal.sync();
 
+////////// 各種定義 ///////////
+const maxBed = 15; // 最大ベッド額
+const maxPlayableBalance = 500; // ジャンケン可能最高残高
+const chargeFreeMaxBalance = 100; // 手数料ゼロ最高残高
+
+/**
+ * 手数料割合の計算関数
+ * (残高 - 手数料ゼロ最大残高) / ジャンケン可能最高残高
+ * 残高150の時、(150 - 100) / 500 = 10 / 100 = 10%
+ * 残高500の時、 (500 - 100) / 500 = 80 / 100 = 80%
+ * @param {Number} balance 残高
+ * @returns {Number} 手数料割合
+ */
+function chargeRate(balance) {
+  return (balance - chargeFreeMaxBalance) / maxPlayableBalance;
+}
+///////////////////////////////
+
 module.exports = robot => {
   // ジャンケンコマンド
   robot.hear(/!nc janken/i, msg => {
@@ -25,17 +43,16 @@ module.exports = robot => {
     }
     const opponentHand = parsed[1];
     const bed = parseInt(parsed[2]);
-    const maxBed = 30;
 
     if (bed > maxBed) {
       msg.send(
-        `${maxBed} Nコイン以上をかけてジャンケンすることは禁止されています。`
+        `*${maxBed}N* コイン以上をかけてジャンケンすることは禁止されています。`
       );
       return;
     }
 
     if (bed <= 0) {
-      msg.send('0 Nコインより小さな数のNコインをかけることはできません。');
+      msg.send('*0N* コインより小さな数のNコインをかけることはできません。');
       return;
     }
 
@@ -60,9 +77,15 @@ module.exports = robot => {
     }).spread((opponentBalance, isCreateOpponent) => {
       if (bed > opponentBalance.balance) {
         msg.send(
-          `<@${opponent.id}>さんの残高は ${
+          `<@${opponent.id}>さんの残高は *${
             opponentBalance.balance
-          } Nコインしかないため、${bed} Nコインをかけてジャンケンすることはできません。`
+          }N* コインしかないため、 *${bed}N* コインをかけてジャンケンをすることはできません。`
+        );
+      } else if (opponentBalance.balance > maxPlayableBalance) {
+        msg.send(
+          `<@${opponent.id}>さんの残高は *${
+            opponentBalance.balance
+          }N* コインもあり、 *${maxPlayableBalance}N* コインより多いためジャンケンすることはできません。`
         );
       } else if (bed <= 0) {
         msg.send('正の整数のベッド額しかしかかけることはできません。');
@@ -80,9 +103,9 @@ module.exports = robot => {
         }).spread((myBalance, isCreatedTo) => {
           if (myBalance.balance < bed) {
             msg.send(
-              `すみません。わたしの残高は ${
+              `すみません。わたしの残高は *${
                 myBalance.balance
-              } Nコインしかないため、${bed} Nコインをかけてジャンケンすることはできません。どなたか寄付をお願いします。`
+              }N* コインしかないため、 *${bed}N* コインをかけてジャンケンすることはできません。どなたか寄付をお願いします。`
             );
             return;
           } else {
@@ -91,7 +114,7 @@ module.exports = robot => {
 
             if (myHand === opponentHand) {
               msg.send(
-                `ジャンケン！ ${myHand}！...あいこですね。またの機会に。`
+                `ジャンケン！ ${myHand}！... *あいこ* ですね。またの機会に。`
               );
               return;
             }
@@ -103,16 +126,27 @@ module.exports = robot => {
 
             if (isWon) {
               msg.send(
-                `ジャンケン！ ${myHand}！...あなたの負けですね。${bed} Nコイン頂きます。`
+                `ジャンケン！ ${myHand}！...あなたの *負け* ですね。 *${bed}N* コイン頂きます。`
               );
               sendCoin(robot, msg, opponent, myId, bed);
               return;
             } else {
-              msg.send(
-                `ジャンケン！ ${myHand}！...あなたの勝ちですね。${bed} Nコインお支払いしましょう。`
-              );
-              sendCoin(robot, msg, me, opponent.id, bed);
-              return;
+              if (opponentBalance.balance <= chargeFreeMaxBalance) {
+                msg.send(
+                  `ジャンケン！ ${myHand}！...あなたの *勝ち* ですね。 *${bed}N* コインお支払いしましょう。`
+                );
+                sendCoin(robot, msg, me, opponent.id, bed);
+                return;
+              } else {
+                const rate = chargeRate(opponentBalance.balance);
+                const charge = Math.ceil(rate * bed);
+                const sendAmount = bed - charge;
+                msg.send(
+                  `ジャンケン！ ${myHand}！...あなたの *勝ち* ですね。 *${charge}N* コインを手数料として頂き、 *${sendAmount}N* コインお支払いしましょう。`
+                );
+                sendCoin(robot, msg, me, opponent.id, sendAmount);
+                return;
+              }
             }
           }
         });
