@@ -27,6 +27,17 @@ const chargeFreeMaxBalance = 100; // 手数料ゼロ最高残高
 function chargeRate(balance) {
   return (balance - chargeFreeMaxBalance) / maxPlayableBalance;
 }
+
+/**
+ * 手数料ゼロ時のサービス割合の計算関数
+ * 残高1の時、 (100 - 1) / 100  + 1 = 199 / 100 = 199%
+ * 残高100の時、 (100 - 100) / 100  + 1 = 100 / 100 = 100%
+ * @param {*} balance 残高
+ * @returns {Number} サービス割合
+ */
+function serviceRate(balance) {
+  return (chargeFreeMaxBalance - balance) / chargeFreeMaxBalance + 1;
+}
 ///////////////////////////////
 
 module.exports = robot => {
@@ -132,10 +143,12 @@ module.exports = robot => {
               return;
             } else {
               if (opponentBalance.balance <= chargeFreeMaxBalance) {
+                const rate = serviceRate(opponentBalance.balance);
+                const sendAmount = Math.ceil(rate * bed);
                 msg.send(
-                  `ジャンケン！ ${myHand}！...あなたの *勝ち* ですね。 *${bed}N* コインお支払いしましょう。`
+                  `ジャンケン！ ${myHand}！...あなたの *勝ち* ですね。 サービスで *${sendAmount}N* コインお支払いしましょう。`
                 );
-                sendCoin(robot, msg, me, opponent.id, bed);
+                sendCoin(robot, msg, me, opponent.id, sendAmount);
                 return;
               } else {
                 const rate = chargeRate(opponentBalance.balance);
