@@ -7,7 +7,7 @@ const Sequelize = loader.Sequelize;
 const sequelize = loader.database;
 const balanceDefaultValue = Balance.balanceDefaultValue;
 const moment = require('moment');
-const dateFormat = 'YYYY-MM-DD hh:mm:ss';
+const dateFormat = 'YYYY-MM-DD HH:mm:ss';
 const sendCoin = require('../models/sendCoin');
 
 Balance.sync();
@@ -238,7 +238,11 @@ module.exports = robot => {
           b.rank = i + 1;
         });
         const messages = balances.map(b => {
-          return `*第${b.rank}位* : <@${b.userId}> *${b.balance}*`;
+          const rankingUser = robot.brain.data.users[b.userId];
+          const rankingUserName = rankingUser.slack.profile.display_name
+            ? rankingUser.slack.profile.display_name
+            : rankingUser.slack.profile.real_name;
+          return `*第${b.rank}位* : *${rankingUserName}* *${b.balance}*`;
         });
         msg.send('■ 残高ランキングTop10\n' + messages.join(' , '));
       })
