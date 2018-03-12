@@ -243,7 +243,7 @@ module.exports = robot => {
             : rankingUser.slack.profile.real_name;
           return `*第${b.rank}位* : *${rankingUserName}* *${b.balance}*`;
         });
-        msg.send('■ 残高ランキングTop10\n' + messages.join('\n'));
+        msg.send('■ 残高ランキングTop10\n' + messages.join(' , '));
       })
       .catch(e => {
         robot.logger.error(e);
