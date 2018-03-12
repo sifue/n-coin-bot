@@ -237,9 +237,13 @@ module.exports = robot => {
           b.rank = i + 1;
         });
         const messages = balances.map(b => {
-          return `*第${b.rank}位* : <@${b.userId}> *${b.balance}*`;
+          const rankingUser = robot.brain.data.users[b.userId];
+          const rankingUserName = rankingUser.slack.profile.display_name
+            ? rankingUser.slack.profile.display_name
+            : rankingUser.slack.profile.real_name;
+          return `*第${b.rank}位* : *${rankingUserName}* *${b.balance}*`;
         });
-        msg.send('■ 残高ランキングTop10\n' + messages.join(' , '));
+        msg.send('■ 残高ランキングTop10\n' + messages.join('\n'));
       })
       .catch(e => {
         robot.logger.error(e);
