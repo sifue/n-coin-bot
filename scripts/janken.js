@@ -14,10 +14,10 @@ Deal.sync();
 ////////// 各種定義 ///////////
 const maxBed = 15; // 最大ベッド額
 const maxPlayableBalance = 500; // ジャンケン可能最高残高
-const chargeFreeMaxBalance = 100; // 手数料ゼロ最高残高
+const chargeFreeMaxBalance = 100; // 手数料ゼロ最高残高 (以下の場合は逆にサービス)
 
 /**
- * 手数料割合の計算関数
+ * 賞金から差し引く手数料割合の計算関数
  * (残高 - 手数料ゼロ最大残高) / ジャンケン可能最高残高
  * 残高150の時、(150 - 100) / 500 = 10 / 100 = 10%
  * 残高500の時、 (500 - 100) / 500 = 80 / 100 = 80%
@@ -29,10 +29,10 @@ function chargeRate(balance) {
 }
 
 /**
- * 手数料ゼロ時のサービス割合の計算関数
+ * 手数料ゼロ時の賞金のサービス割合の計算関数
  * 残高1の時、 (100 - 1) / 100  + 1 = 199 / 100 = 199%
  * 残高100の時、 (100 - 100) / 100  + 1 = 100 / 100 = 100%
- * @param {*} balance 残高
+ * @param {Number} balance 残高
  * @returns {Number} サービス割合
  */
 function serviceRate(balance) {
@@ -143,6 +143,7 @@ module.exports = robot => {
               return;
             } else {
               if (opponentBalance.balance <= chargeFreeMaxBalance) {
+                // サービス時
                 const rate = serviceRate(opponentBalance.balance);
                 const sendAmount = Math.ceil(rate * bed);
                 msg.send(
@@ -151,6 +152,7 @@ module.exports = robot => {
                 sendCoin(robot, msg, me, opponent.id, sendAmount);
                 return;
               } else {
+                // 手数料必須時
                 const rate = chargeRate(opponentBalance.balance);
                 const charge = Math.ceil(rate * bed);
                 const sendAmount = bed - charge;
