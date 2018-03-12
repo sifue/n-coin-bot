@@ -7,7 +7,7 @@ const Sequelize = loader.Sequelize;
 const sequelize = loader.database;
 const balanceDefaultValue = Balance.balanceDefaultValue;
 const moment = require('moment');
-const dateFormat = 'YYYY-MM-DD hh:mm:ss';
+const dateFormat = 'YYYY-MM-DD HH:mm:ss';
 const sendCoin = require('../models/sendCoin');
 
 Balance.sync();
