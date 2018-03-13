@@ -154,7 +154,7 @@ module.exports = robot => {
               } else {
                 // 手数料必須時
                 const rate = chargeRate(opponentBalance.balance);
-                const charge = Math.ceil(rate * bed);
+                const charge = Math.floor(rate * bed);
                 const sendAmount = bed - charge;
                 msg.send(
                   `ジャンケン！ ${myHand}！...あなたの *勝ち* ですね。 *${charge}N* コインを手数料として頂き、 *${sendAmount}N* コインお支払いしましょう。`
