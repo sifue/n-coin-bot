@@ -110,6 +110,18 @@ module.exports = robot => {
     });
   });
 
+  //オークション機能のヘルプ
+  robot.hear(/!nc auction help/i, msg => {
+    msg.send(
+      '■ マーケットボードコマンド一覧\n' +
+        '`!nc auction` 出品状況の表示 (出品者に対してメンションが飛ぶためDMでの利用推奨)\n' +
+        '`!nc auction {オークションID}` 対象商品の入札状況を確認 (DM推奨)\n' +
+        '`!nc auction add {商品説明} {スタート価格(1以上)} {入札受付期間(日単位/30日以下)}` 出品\n' +
+        '`!nc auction bid {オークションID} {入札価格}` 入札\n' +
+        '`!nc auction delete {オークションID}` 商品の削除'
+    );
+  });
+
   //対象商品の詳細確認
   robot.hear(/!nc auction (\d+)/i, msg => {
     const parsed = msg.message.rawText.match(/!nc auction (\d+)$/);
