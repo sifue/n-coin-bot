@@ -18,7 +18,7 @@ Deal.sync();
 AuctionItem.sync();
 AuctionBid.sync();
 const maxPrice = 100000;
-const auctionChannelId = 'C84P7122E';
+const auctionChannelId = 'C9QL4HQLW';
 const auctionItemMsgFormat =
   '[<id>] *<description>*\n出品者: <@<userId>>\n出品時刻: *<date>*\n入札受付期間: *残り<timeLimit>日*\nスタート価格: *<startPrice>N*';
 const auctionBidLogMsgFormat =
