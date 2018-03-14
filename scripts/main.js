@@ -38,6 +38,7 @@ module.exports = robot => {
         '`!nc top100` 残高ランキングトップ100を確認 (DMでの利用推奨)\n' +
         '`!nc deallog {表示件数(1000未満)}` 自分の取引履歴を確認 (DMでの利用推奨)\n' +
         '`!nc markethelp` マーケットボードの使い方の表示\n' +
+        '`!nc auction help` オークション機能の使い方の表示\n' +
         '`!nc couple {@ユーザー名}` *1N* コインで今日の相手との相性を占う\n' +
         '`!nc janken {グー or チョキ or パー} {ベッド額(正の整数)}` Nコインをかけてボットとジャンケン\n' +
         'リアクション `:nc+1:` を付けることで 1 Nコインを相手に送金'
@@ -241,9 +242,14 @@ module.exports = robot => {
         });
         const messages = balances.map(b => {
           const rankingUser = robot.brain.data.users[b.userId];
-          const rankingUserName = rankingUser.slack.profile.display_name
+          let rankingUserName = rankingUser.slack.profile.display_name
             ? rankingUser.slack.profile.display_name
             : rankingUser.slack.profile.real_name;
+          const insertIndex = rankingUserName.length - 1;
+          rankingUserName =
+            rankingUserName.slice(0, insertIndex) +
+            '.' +
+            rankingUserName.slice(insertIndex);
           return `第${b.rank}位 : ${rankingUserName} *${b.balance}*`;
         });
         msg.send('■ 残高ランキングTop10\n' + messages.join(' , '));
@@ -268,9 +274,14 @@ module.exports = robot => {
         });
         const messages = balances.map(b => {
           const rankingUser = robot.brain.data.users[b.userId];
-          const rankingUserName = rankingUser.slack.profile.display_name
+          let rankingUserName = rankingUser.slack.profile.display_name
             ? rankingUser.slack.profile.display_name
             : rankingUser.slack.profile.real_name;
+          const insertIndex = rankingUserName.length - 1;
+          rankingUserName =
+            rankingUserName.slice(0, insertIndex) +
+            '.' +
+            rankingUserName.slice(insertIndex);
           return `第${b.rank}位 : ${rankingUserName} *${b.balance}*`;
         });
         msg.send('■ 残高ランキングTop100\n' + messages.join(' , '));
