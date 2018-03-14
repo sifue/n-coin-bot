@@ -18,8 +18,7 @@ Deal.sync();
 AuctionItem.sync();
 AuctionBid.sync();
 const maxPrice = 100000;
-// const auctionChannelId = 'C9QL4HQLW';
-const auctionChannelId = 'C84P7122E';
+const auctionChannelId = 'C9QL4HQLW';
 const auctionItemMsgFormat =
   '[<id>] *<description>*\n出品者: <@<userId>>\n出品時刻: *<date>*\n入札受付期間: *残り<timeLimit>日*\nスタート価格: *<startPrice>N*';
 const auctionBidLogMsgFormat =
@@ -27,7 +26,7 @@ const auctionBidLogMsgFormat =
 
 module.exports = robot => {
   //毎時に商品の残り時間を更新
-  cron.schedule(`0 39 2 * * *`, () => {
+  cron.schedule(`0 0 * * * *`, () => {
     AuctionItem.findAll().then(auctionItems => {
       if (auctionItems.length) {
         auctionItems.forEach(auctionItem => {
