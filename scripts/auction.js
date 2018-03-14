@@ -113,7 +113,7 @@ module.exports = robot => {
   //オークション機能のヘルプ
   robot.hear(/!nc auction help/i, msg => {
     msg.send(
-      '■ マーケットボードコマンド一覧\n' +
+      '■ オークションコマンド一覧\n' +
         '`!nc auction` 出品状況の表示 (出品者に対してメンションが飛ぶためDMでの利用推奨)\n' +
         '`!nc auction {オークションID}` 対象商品の入札状況を確認 (DM推奨)\n' +
         '`!nc auction add {商品説明} {スタート価格(1以上)} {入札受付期間(日単位/30日以下)}` 出品\n' +
