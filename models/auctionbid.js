@@ -5,7 +5,7 @@ const Sequelize = loader.Sequelize;
 const Auctionbid = loader.database.define(
   'auctionbids',
   {
-    id: {
+    auctionbidId: {
       type: Sequelize.INTEGER,
       primaryKey: true,
       autoIncrement: true
@@ -27,9 +27,6 @@ const Auctionbid = loader.database.define(
     freezeTableName: false,
     timestamps: true,
     indexes: [
-      {
-        fields: ['id']
-      },
       {
         fields: ['auctionitemId']
       }
