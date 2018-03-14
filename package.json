@@ -19,6 +19,7 @@
     "hubot-shipit": "^0.2.1",
     "hubot-slack": "^4.4.0",
     "moment": "^2.21.0",
+    "node-cron": "^1.2.1",
     "pg": "^6.1.0",
     "pg-hstore": "^2.3.2",
     "sequelize": "^3.25.0"
