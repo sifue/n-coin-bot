@@ -65,7 +65,8 @@ module.exports = robot => {
         '`!nc auction {オークションID}` 対象商品の入札状況を確認 (DM推奨)\n' +
         '`!nc auctionadd {商品説明} {スタート価格(1以上)} {入札受付期間(日単位/30日以下)}` 出品\n' +
         '`!nc auctionbid {オークションID} {入札価格}` 入札\n' +
-        '`!nc auctiondelete {オークションID}` 商品の削除'
+        '`!nc auctiondelete {オークションID}` 商品の削除\n' +
+        '`!nc auctionfinish {オークションID}` 商品の終了(最高額入札者が落札)'
     );
   });
 
@@ -223,7 +224,7 @@ module.exports = robot => {
     const parsed = msg.message.rawText.match(/^!nc auctionfinish (\d+)$/);
     if (!parsed) {
       msg.send(
-        'オークション終了コマンドの形式が`!nc auctionfinish {オークションID}` ではありません。'
+        'オークション終了コマンドの形式が `!nc auctionfinish {オークションID}` ではありません。'
       );
     }
     const fromUserId = msg.message.user.id;
