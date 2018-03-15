@@ -30,27 +30,22 @@ module.exports = robot => {
     AuctionItem.findAll().then(auctionItems => {
       if (auctionItems.length) {
         auctionItems.forEach(auctionItem => {
-          const createdAt = auctionItem.dataValues.createdAt;
-          if (moment(createdAt).hours() === moment().hour()) {
-            const timeLimit = auctionItem.dataValues.timeLimit;
+          //startOfで"時"未満の情報を削ぎ落とす
+          const createdAt = moment(auctionItem.dataValues.createdAt).startOf(
+            'hour',
+            'minute',
+            'second'
+          );
+          const timeLimit = auctionItem.dataValues.timeLimit;
+          const finishDate = createdAt.add(timeLimit, 'days');
+          const nowDate = moment().startOf('hour', 'minute', 'second');
+
+          //入札受付期間満了
+          if (nowDate >= finishDate) {
             const auctionitemId = auctionItem.dataValues.auctionitemId;
             const description = auctionItem.dataValues.description;
             const userId = auctionItem.dataValues.userId;
-            //入札受付期間満了
-            if (timeLimit <= 1) {
-              auctionFinish(robot, auctionitemId);
-            } else {
-              AuctionItem.update(
-                {
-                  timeLimit: timeLimit - 1
-                },
-                {
-                  where: { id: auctionitemId }
-                }
-              ).catch(e => {
-                robot.logger.error(e);
-              });
-            }
+            auctionFinish(robot, auctionitemId);
           }
         });
       }
@@ -61,7 +56,8 @@ module.exports = robot => {
   robot.hear(/!nc auctionhelp/i, msg => {
     msg.send(
       '■ オークションコマンド一覧\n' +
-        '`!nc auction` 出品状況の表示 (出品者に対してメンションが飛ぶためDMでの利用推奨)\n' +
+        '現時点では自動決済機能は実装されていない為、落札者と出品者が直接連絡を取るシステムです。\n' +
+        '`!nc auctions` 出品状況の表示 (出品者に対してメンションが飛ぶためDMでの利用推奨)\n' +
         '`!nc auction {オークションID}` 対象商品の入札状況を確認 (DM推奨)\n' +
         '`!nc auctionadd {商品説明} {スタート価格(1以上)} {入札受付期間(日単位/30日以下)}` 出品\n' +
         '`!nc auctionbid {オークションID} {入札価格}` 入札\n' +
@@ -148,7 +144,7 @@ module.exports = robot => {
   });
 
   // オークション出品状況確認コマンド
-  robot.hear(/!nc auction$/i, msg => {
+  robot.hear(/!nc auctions/i, msg => {
     //全商品検索
     AuctionItem.findAll({
       limit: 100,
@@ -300,7 +296,7 @@ function auctionFinish(robot, auctionitemId) {
         //入札者無し 出品者DM
         robot.messageRoom(
           userId,
-          `オークションに出品していた [${auctionitemId}] *${description}* の入札期限日になりましたが、入札者は0人でした...:cry:。またのご利用をお待ちしております。`
+          `オークションに出品していた *${description}* の入札期限日になりましたが、入札者は0人でした...:cry:。またのご利用をお待ちしております。`
         );
       }
       return AuctionItem.destroy({ where: { auctionitemId: auctionitemId } });
@@ -311,12 +307,10 @@ function auctionFinish(robot, auctionitemId) {
     .catch(e => {
       switch (e) {
         case 'auction item not found':
-          console.log('not found');
           //対象商品が見つからない
           break;
         case 'permission denied':
           //本人以外が終了操作
-          console.log('permission denied');
           break;
         default:
           robot.logger.error(e);
