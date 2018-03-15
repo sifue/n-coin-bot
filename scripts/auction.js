@@ -31,27 +31,27 @@ module.exports = robot => {
       if (auctionItems.length) {
         auctionItems.forEach(auctionItem => {
           const createdAt = auctionItem.dataValues.createdAt;
-          // if (moment(createdAt).hours() === moment().hour()) {
-          const timeLimit = auctionItem.dataValues.timeLimit;
-          const auctionitemId = auctionItem.dataValues.auctionitemId;
-          const description = auctionItem.dataValues.description;
-          const userId = auctionItem.dataValues.userId;
-          //入札受付期間満了
-          if (timeLimit <= 1) {
-            auctionFinish(robot, auctionitemId);
-          } else {
-            AuctionItem.update(
-              {
-                timeLimit: timeLimit - 1
-              },
-              {
-                where: { id: auctionitemId }
-              }
-            ).catch(e => {
-              robot.logger.error(e);
-            });
+          if (moment(createdAt).hours() === moment().hour()) {
+            const timeLimit = auctionItem.dataValues.timeLimit;
+            const auctionitemId = auctionItem.dataValues.auctionitemId;
+            const description = auctionItem.dataValues.description;
+            const userId = auctionItem.dataValues.userId;
+            //入札受付期間満了
+            if (timeLimit <= 1) {
+              auctionFinish(robot, auctionitemId);
+            } else {
+              AuctionItem.update(
+                {
+                  timeLimit: timeLimit - 1
+                },
+                {
+                  where: { id: auctionitemId }
+                }
+              ).catch(e => {
+                robot.logger.error(e);
+              });
+            }
           }
-          // }
         });
       }
     });
