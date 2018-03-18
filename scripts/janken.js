@@ -87,7 +87,15 @@ module.exports = robot => {
         isAdmin: false
       }
     }).spread((opponentBalance, isCreateOpponent) => {
-      if (bed > opponentBalance.balance) {
+      if (opponentBalance.balance <= 10){
+        msg.send(
+          `<@${opponent.id}>さんの残高は ${
+            opponentBalance.balance
+          } Nコインしかないため、${bed} これ以上ジャンケンは出来ません。`
+        );
+        return;
+      }
+      else if (bed > opponentBalance.balance) {
         msg.send(
           `<@${opponent.id}>さんの残高は *${
             opponentBalance.balance
