@@ -2,6 +2,7 @@
 
 const Balance = require('../models/balance');
 const Deal = require('../models/deal');
+const Gambler = require('../models/gambler');
 const loader = require('../models/sequelizeLoader');
 const Sequelize = loader.Sequelize;
 const sequelize = loader.database;
@@ -291,3 +292,76 @@ module.exports = robot => {
       });
   });
 };
+
+// その他、直接コインの機能に関係のない機能
+// 宝くじ
+let deposit = 0;
+robot.hear(/!nc lottery/, (msg) => {
+  msg.send('*Ｎコイン宝くじ*\n' +
+           '賭け金 : 10NC\n' +
+           '当選金は全員の賭け金から支払われます\n' +
+           '  一等 : 70%\n' +
+           '  二等 : 20%\n' +
+           '  三等 : 10%\n' +
+           '抽選日 : 毎週日曜日 １２：００\n' +
+           '※注意事項※' +
+           '宝くじ購入者が５人に満たない場合は抽選が行われません（返金されます）\n' +
+           '当落を問わず損失が出る可能性があります。また損失について開発者を含め誰も責任を負いません（最重要）\n' +
+           '購入後取り消すことはできません' +
+           '購入方法 : ```!nc lottery bet```');
+});
+robot.hear(/!nc lottery now/, (msg) => {
+  msg.send('*Ｎコイン宝くじ　現在の状況*\n' +
+           `賭け金合計 : ${deposit}\n`);
+})
+robot.hear(/!nc lottery bet/, (msg) => {
+  const user = msg.messages.user;
+  const userId = user.id;
+  Gambler.findOrCreate({
+           where: {userId: userId},
+           defaults: {
+             userId: userId,
+             isBet: false
+           }
+         })
+      .spread((gambler, isCreatedGambler) => {
+        if (gambler.isBet) {
+          msg.send(`${userId}さんは既に今週の宝くじを購入しているのでこれ以上買うことはできません。\n`);
+        } else {
+          Balance.findOrCreate({
+                   where: {userId: userId},
+                   defaults: {
+                     userId: userId,
+                     name: user.name,
+                     realName: user.real_name,
+                     displayName: user.profile.display_name,
+                     balance: balanceDefaultValue,
+                     isAdmin: false
+                   }
+                 })
+              .spread((balance, isCreated) => {
+                if (balance.balance < 10) {
+                  msg.send(`${userId}さんの残高が10NCに満たないので購入できませんでした。\n`);
+                } else {
+                  sequelize.transaction((t) => {
+                    const newBalanceValue = balance.balance - 10;
+                    const update = Balance.update(
+                        {balance: newBalanceValue},
+                        {where: {userId: userId}},
+                        {transaction: t});
+                    const addDeposit = update.then(() => {
+                      deposit += 10;
+                    });
+                    return addDeposit.then(() => {
+                      msg.send(`Ｎコイン宝くじ、ご購入ありがとうございます！` +
+                               `代金として 10NC 頂いたので、${userId}さんの残高は ${balance.balance} Ｎコインになりました。`);
+                    });
+                  });
+                }
+              })
+              .catch((e) => {
+                robot.logger.error(e);
+              });
+        }
+      })
+});
